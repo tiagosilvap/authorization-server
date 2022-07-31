@@ -32,14 +32,36 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients
                 .inMemory()
-                .withClient("algafood-web")
-                .secret(passwordEncoder.encode("web123"))
-                .authorizedGrantTypes("password", "refresh_token")
-                .scopes("write", "read")
-                .accessTokenValiditySeconds(60 * 60 * 6)
+                    .withClient("algafood-web")
+                        .secret(passwordEncoder.encode("web123"))
+                        .authorizedGrantTypes("password", "refresh_token")
+                        .scopes("write", "read")
+                        .accessTokenValiditySeconds(100)
+                        .refreshTokenValiditySeconds(300)
                 .and()
-                .withClient("checktoken")
-                .secret(passwordEncoder.encode("check123"));
+                    .withClient("api-hotpay")
+                        .secret(passwordEncoder.encode("hotpay"))
+                        .authorizedGrantTypes("client_credentials")
+                        .scopes("read", "write")
+                .and()
+                    .withClient("marketplace")
+                        .secret(passwordEncoder.encode("123"))
+                        .authorizedGrantTypes("authorization_code")
+                        .accessTokenValiditySeconds(15)
+                        .scopes("read", "write")
+                        .redirectUris(
+                                "http://localhost:63341/authorization-code-client/index.html",
+                                "http://localhost:63343/authorization-code-client/index.html"
+                        )
+                .and()
+                    .withClient("hub")
+                        .authorizedGrantTypes("implicit")
+                        .scopes("read", "write")
+                        .redirectUris("http://aplicacao-cliente")
+                
+                .and()
+                    .withClient("checktoken")
+                        .secret(passwordEncoder.encode("check123"));
     }
     
     
@@ -60,7 +82,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
                 .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+                .userDetailsService(userDetailsService)
+                .reuseRefreshTokens(false);
     }
     
 }
