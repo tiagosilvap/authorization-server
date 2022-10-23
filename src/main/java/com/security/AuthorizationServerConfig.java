@@ -53,10 +53,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                         .authorizedGrantTypes("authorization_code")
                         .accessTokenValiditySeconds(15)
                         .scopes("read", "write")
-                        .redirectUris(
-                                "http://localhost:63341/authorization-code-client/index.html",
-                                "http://localhost:63343/authorization-code-client/index.html"
-                        )
+                        .redirectUris("http://localhost:63341/authorization-code-client/index.html")
                 .and()
                     .withClient("hub")
                         .authorizedGrantTypes("implicit")
