@@ -56,7 +56,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                         .redirectUris("http://localhost:63341/authorization-code-client/index.html")
                 .and()
                     .withClient("pkce-client")
-                        .secret(passwordEncoder.encode("123"))
+                        .secret(passwordEncoder.encode(""))
                         .authorizedGrantTypes("authorization_code")
                         .accessTokenValiditySeconds(15)
                         .scopes("read", "write")
@@ -74,12 +74,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     
     
     /**
-     * Autorizar resource owners sem a necessidade de passar o client id e secret id nas chamadas
+     * checkTokenAccess("permitAll()") - Autorizar resource owners sem a necessidade de passar o client id e secret id nas chamadas
+     * allowFormAuthenticationForClients - Permite passar as credenciais (client id e secret id) do cliente no body da requisicao
      */
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 //		security.checkTokenAccess("isAuthenticated()");
-        security.checkTokenAccess("permitAll()");
+        security.checkTokenAccess("permitAll()").allowFormAuthenticationForClients();
     }
     
     /**
