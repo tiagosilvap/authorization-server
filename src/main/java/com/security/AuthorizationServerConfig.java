@@ -3,6 +3,7 @@ package com.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
 import java.util.Arrays;
 
@@ -29,6 +31,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     
     @Autowired
     private UserDetailsService userDetailsService;
+    
+    @Autowired
+    private JwtKeyStoreProperties jwtKeyStoreProperties;
     
     /**
      * Configurando clients em memória utilizando os fluxos de autenticaçào password e refresh_token
@@ -77,11 +82,14 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     /**
      * checkTokenAccess("permitAll()") - Autorizar resource owners sem a necessidade de passar o client id e secret id nas chamadas
      * allowFormAuthenticationForClients - Permite passar as credenciais (client id e secret id) do cliente no body da requisicao
+     * tokenKeyAccess("permitAll()") - Libera o endpoint /oauth/token_key para obter a chave publica usado no alg assimétrico para geraçao do JWT
      */
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 //		security.checkTokenAccess("isAuthenticated()");
-        security.checkTokenAccess("permitAll()").allowFormAuthenticationForClients();
+        security.checkTokenAccess("permitAll()")
+                .tokenKeyAccess("permitAll()")
+                .allowFormAuthenticationForClients();
     }
     
     /**
@@ -102,8 +110,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setSigningKey("89a7sd89f7as98f7dsa98fds7fd89sasd9898asdf98s");
+        var jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        var jksResource = new ClassPathResource(jwtKeyStoreProperties.getPath());
+        var keyStorePass = jwtKeyStoreProperties.getPassword();
+        var keyPairAlias = jwtKeyStoreProperties.getKeypairAlias();
+        var keyStoreKeyFactory = new KeyStoreKeyFactory(jksResource, keyStorePass.toCharArray());
+        var keyPair = keyStoreKeyFactory.getKeyPair(keyPairAlias);
+        jwtAccessTokenConverter.setKeyPair(keyPair);
         return jwtAccessTokenConverter;
     }
     

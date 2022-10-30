@@ -5,3 +5,10 @@ server:
 logging:
   level:
     org.springframework.security: trace
+
+algafood:
+  jwt:
+    keystore:
+      path: keystores/oauth2.jks
+      password: 123456
+      keypair-alias: oauth2
