@@ -63,7 +63,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                         .secret(passwordEncoder.encode("123"))
                         .authorizedGrantTypes("authorization_code")
                         .accessTokenValiditySeconds(15)
-                        .scopes("read")
+                        .scopes("read", "write")
                         .redirectUris("http://localhost:63341/authorization-code-client/index.html")
                 .and()
                     .withClient("pkce-client")
