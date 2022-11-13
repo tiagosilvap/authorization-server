@@ -1,4 +1,4 @@
-package com.security.core;
+package com.security.core.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

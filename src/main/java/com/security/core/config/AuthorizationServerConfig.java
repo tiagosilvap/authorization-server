@@ -1,5 +1,9 @@
-package com.security.core;
+package com.security.core.config;
 
+import com.security.core.mfa.MfaService;
+import com.security.core.mfa.MfaTokenGranter;
+import com.security.core.mfa.PasswordTokenGranter;
+import com.security.core.pkce.PkceAuthorizationCodeTokenGranter;
 import com.security.core.user.JwtCustomClaimsTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +44,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private JwtKeyStoreProperties jwtKeyStoreProperties;
     
+    @Autowired
+    private MfaService mfaService;
+    
     /**
      * Configurando clients em memória utilizando os fluxos de autenticaçào password e refresh_token
      */
@@ -49,7 +56,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .inMemory()
                     .withClient("algafood-web")
                         .secret(passwordEncoder.encode("web123"))
-                        .authorizedGrantTypes("password", "refresh_token")
+                        .authorizedGrantTypes("password", "refresh_token", "mfa")
                         .scopes("write", "read")
                         .accessTokenValiditySeconds(100)
                         .refreshTokenValiditySeconds(300)
@@ -112,7 +119,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         );
         
         endpoints
-                .authenticationManager(authenticationManager)
+                /*Linha comentda para não utilizar o Password Flow padrão do oauth2 e usar o PasswordTokenGranter criado no pacote mfa do projeto*/
+                /*.authenticationManager(authenticationManager)*/
                 .userDetailsService(userDetailsService)
                 .reuseRefreshTokens(false)
                 .accessTokenConverter(jwtAccessTokenConverter())
@@ -150,11 +158,16 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                         endpoints.getClientDetailsService(),
                         endpoints.getOAuth2RequestFactory()
                 );
-        
+    
+        var passwordTokenGranter = new PasswordTokenGranter(endpoints, authenticationManager, mfaService);
+        var mfaTokenGranter = new MfaTokenGranter(endpoints, authenticationManager, mfaService);
+    
         var granters = Arrays.asList(
-                pkceAuthorizationCodeTokenGranter, endpoints.getTokenGranter());
+                passwordTokenGranter,
+                mfaTokenGranter,
+                pkceAuthorizationCodeTokenGranter,
+                endpoints.getTokenGranter());
         
         return new CompositeTokenGranter(granters);
     }
-    
 }
