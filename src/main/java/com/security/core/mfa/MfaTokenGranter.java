@@ -129,6 +129,12 @@ public class MfaTokenGranter extends AbstractTokenGranter {
         }
     }
     
+    /**
+     * Este método limita o escopo de autenticaçào de acordo com os escopos pré definidos para o client
+     * @param authentication
+     * @param request
+     * @return OAuth2Authentication
+     */
     private OAuth2Authentication refreshAuthentication(OAuth2Authentication authentication, TokenRequest request) {
         Set<String> scope = request.getScope();
         OAuth2Request clientAuth = authentication.getOAuth2Request().refresh(request);
