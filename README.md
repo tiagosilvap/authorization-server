@@ -30,6 +30,6 @@ keytool -importkeystore -srckeystore oauth2.jks -srcstorepass 123456 -srckeypass
 
 openssl pkcs12 -in oauth2.p12 -nodes -nocerts -out private_key.pem
 
-### Exportando public key do arquivo PKCS12 gerado
+### Gerando o certificado
 
 openssl pkcs12 -in oauth2.p12 -nokeys -out cert.pem
