@@ -111,9 +111,11 @@ public class MfaTokenGranter extends AbstractTokenGranter {
     
         UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(
                 userDetails, authentication.getCredentials(), userDetails.getAuthorities());
-        
+    
+        Object details = authentication.getDetails();
         authentication = new OAuth2Authentication(authentication.getOAuth2Request(), user);
-        
+        authentication.setDetails(details);
+    
         String clientId = authentication.getOAuth2Request().getClientId();
         if (clientId != null && clientId.equals(tokenRequest.getClientId())) {
             if (this.clientDetailsService != null) {
