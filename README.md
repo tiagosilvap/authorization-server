@@ -29,3 +29,8 @@ keytool -importkeystore -srckeystore oauth2.jks -srcstorepass 123456 -srckeypass
 ### Exportando private key do arquivo PKCS12 gerado
 
 openssl pkcs12 -in oauth2.p12 -nodes -nocerts -out private_key.pem
+
+
+
+## Multi-Factor Authentication reference
+https://sultanov.dev/blog/multi-factor-authentication-with-spring-boot-and-oauth2/#:~:text=Multi%2Dfactor%20Authentication%20(MFA),the%20likelihood%20of%20unauthorized%20access.
