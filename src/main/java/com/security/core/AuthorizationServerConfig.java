@@ -22,14 +22,12 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
     
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -40,49 +38,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private JwtKeyStoreProperties jwtKeyStoreProperties;
     
-    /**
-     * Configurando clients em memória utilizando os fluxos de autenticaçào password e refresh_token
-     */
+    @Autowired
+    private DataSource dataSource;
+    
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients
-                .inMemory()
-                    .withClient("algafood-web")
-                        .secret(passwordEncoder.encode("web123"))
-                        .authorizedGrantTypes("password", "refresh_token")
-                        .scopes("write", "read")
-                        .accessTokenValiditySeconds(100)
-                        .refreshTokenValiditySeconds(300)
-                .and()
-                    .withClient("api-hotpay")
-                        .secret(passwordEncoder.encode("hotpay"))
-                        .authorizedGrantTypes("client_credentials")
-                        .scopes("read")
-                .and()
-                    .withClient("marketplace")
-                        .secret(passwordEncoder.encode("123"))
-                        .authorizedGrantTypes("authorization_code")
-                        .accessTokenValiditySeconds(200)
-                        .scopes("read", "write")
-                        .redirectUris("http://localhost:63341/authorization-code-client/index.html")
-                .and()
-                    .withClient("pkce-client")
-                        .secret(passwordEncoder.encode(""))
-                        .authorizedGrantTypes("authorization_code")
-                        .accessTokenValiditySeconds(200)
-                        .scopes("read", "write")
-                        .redirectUris("http://localhost:63341/authorization-code-pkce-client/index.html")
-                .and()
-                    .withClient("hub")
-                        .authorizedGrantTypes("implicit")
-                        .scopes("read", "write")
-                        .redirectUris("http://aplicacao-cliente")
-                
-                .and()
-                    .withClient("checktoken")
-                        .secret(passwordEncoder.encode("check123"));
+        clients.jdbc(dataSource);
     }
-    
     
     /**
      * checkTokenAccess("permitAll()") - Autorizar resource owners sem a necessidade de passar o client id e secret id nas chamadas
